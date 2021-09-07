@@ -39,7 +39,7 @@ steps:
 - task: AzureCLI@2
   displayName: 'Configure Environments'
   inputs:
-    azureSubscription: 'Visual Studio Enterprise – MPN(ab1ad37f-a64b-457e-9de2-d6589579fe0c)'
+    azureSubscription: ''
     scriptType: 'pscore'
     scriptLocation: 'inlineScript'
     inlineScript: |
@@ -51,7 +51,7 @@ steps:
   displayName: 'Deploy Application'
   inputs:
     ConnectionType: 'AzureRM'
-    azureSubscription: 'Visual Studio Enterprise – MPN(ab1ad37f-a64b-457e-9de2-d6589579fe0c)'
+    azureSubscription: ''
     appType: 'webApp'
     WebAppName: '$(webappname)'
     packageForLinux: '$(System.ArtifactsDirectory)/$(Build.DefinitionName).$(Build.BuildId).zip'
