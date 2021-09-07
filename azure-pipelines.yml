@@ -1,0 +1,57 @@
+# PHP
+# Test and package your PHP project.
+# Add steps that run tests, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/php
+
+trigger:
+- azure-pipelines
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  phpVersion: 7.2
+
+steps:
+- task: ArchiveFiles@2
+  displayName: 'Archive Files'
+  inputs:
+    rootFolderOrFile: '$(Build.SourcesDirectory)'
+    archiveType: 'zip'
+    includeRootFolder: false
+    replaceExistingArchive: true
+    archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.DefinitionName).$(Build.BuildId).zip'
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact'
+  inputs:
+    ArtifactName: 'drop'
+    PathtoPublish: $(Build.ArtifactStagingDirectory)
+
+- task: DownloadBuildArtifacts@1
+  inputs:
+    buildType: 'current'
+    downloadType: 'single'
+    artifactName: 'drop'
+    itemPattern: '**/*.zip'
+    downloadPath: '$(System.ArtifactsDirectory)'
+
+- task: AzureCLI@2
+  displayName: 'Configure Environments'
+  inputs:
+    azureSubscription: 'Visual Studio Enterprise – MPN(ab1ad37f-a64b-457e-9de2-d6589579fe0c)'
+    scriptType: 'pscore'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      az group create --location $(Location) --name $(myResourceGroup)
+      az appservice plan create --name $(webappname) --resource-group $(myResourceGroup) --sku S1
+      az webapp create --name $(webappname) --resource-group $(myResourceGroup) --plan $(webappname)
+
+- task: AzureRmWebAppDeployment@4
+  displayName: 'Deploy Application'
+  inputs:
+    ConnectionType: 'AzureRM'
+    azureSubscription: 'Visual Studio Enterprise – MPN(ab1ad37f-a64b-457e-9de2-d6589579fe0c)'
+    appType: 'webApp'
+    WebAppName: '$(webappname)'
+    packageForLinux: '$(System.ArtifactsDirectory)/$(Build.DefinitionName).$(Build.BuildId).zip'
