@@ -4,7 +4,7 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/php
 
 trigger:
-- azure-pipelines
+- master
 
 pool:
   vmImage: ubuntu-latest
@@ -27,31 +27,3 @@ steps:
   inputs:
     ArtifactName: 'drop'
     PathtoPublish: $(Build.ArtifactStagingDirectory)
-
-- task: DownloadBuildArtifacts@1
-  inputs:
-    buildType: 'current'
-    downloadType: 'single'
-    artifactName: 'drop'
-    itemPattern: '**/*.zip'
-    downloadPath: '$(System.ArtifactsDirectory)'
-
-- task: AzureCLI@2
-  displayName: 'Configure Environments'
-  inputs:
-    azureSubscription: ''
-    scriptType: 'pscore'
-    scriptLocation: 'inlineScript'
-    inlineScript: |
-      az group create --location $(Location) --name $(myResourceGroup)
-      az appservice plan create --name $(webappname) --resource-group $(myResourceGroup) --sku S1
-      az webapp create --name $(webappname) --resource-group $(myResourceGroup) --plan $(webappname)
-
-- task: AzureRmWebAppDeployment@4
-  displayName: 'Deploy Application'
-  inputs:
-    ConnectionType: 'AzureRM'
-    azureSubscription: ''
-    appType: 'webApp'
-    WebAppName: '$(webappname)'
-    packageForLinux: '$(System.ArtifactsDirectory)/$(Build.DefinitionName).$(Build.BuildId).zip'
