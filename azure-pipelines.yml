@@ -3,27 +3,76 @@
 # Add steps that run tests, save build artifacts, deploy, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/php
 
-trigger:
-- master
+# trigger:
+# - master
 
-pool:
-  vmImage: ubuntu-latest
+# pool:
+#   vmImage: ubuntu-latest
+
+# variables:
+#   phpVersion: 7.2
+
+# steps:
+# - task: ArchiveFiles@2
+#   displayName: 'Archive Files'
+#   inputs:
+#     rootFolderOrFile: '$(Build.SourcesDirectory)'
+#     archiveType: 'zip'
+#     includeRootFolder: false
+#     replaceExistingArchive: true
+#     archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.DefinitionName).$(Build.BuildId).zip'
+
+# - task: PublishBuildArtifacts@1
+#   displayName: 'Publish Artifact'
+#   inputs:
+#     ArtifactName: 'drop'
+#     PathtoPublish: $(Build.ArtifactStagingDirectory)
+
+
+
+
+
+
+trigger:
+- Master
 
 variables:
-  phpVersion: 7.2
+  # Azure Resource Manager connection created during pipeline creation
+  azureSubscription: 'subscription-id'
+  # Web app name
+  webAppName: 'web-app-name'
+  # Agent VM image name
+  vmImageName: 'ubuntu-latest'
+  # Environment name
+  environmentName: 'environment-name'
+  # Root folder under which your composer.json file is available.
+  rootFolder: $(System.DefaultWorkingDirectory)
 
-steps:
-- task: ArchiveFiles@2
-  displayName: 'Archive Files'
-  inputs:
-    rootFolderOrFile: '$(Build.SourcesDirectory)'
-    archiveType: 'zip'
-    includeRootFolder: false
-    replaceExistingArchive: true
-    archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.DefinitionName).$(Build.BuildId).zip'
+stages:
+- stage: Build
+  displayName: Build stage
+  variables:
+    phpVersion: '7.2'
+  jobs:
+  - job: BuildJob
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: ArchiveFiles@2
+      displayName: 'Archive Files'
+      inputs:
+        rootFolderOrFile: '$(Build.SourcesDirectory)'
+        archiveType: 'zip'
+        includeRootFolder: false
+        replaceExistingArchive: true
+        archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.DefinitionName).$(Build.BuildId).zip'
 
-- task: PublishBuildArtifacts@1
-  displayName: 'Publish Artifact'
-  inputs:
-    ArtifactName: 'drop'
-    PathtoPublish: $(Build.ArtifactStagingDirectory)
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifact'
+      inputs:
+        ArtifactName: 'drop'
+        PathtoPublish: $(Build.ArtifactStagingDirectory)
+  
+    
+
+
