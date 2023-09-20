@@ -46,4 +46,25 @@ stages:
   
     
 
-
+- stage: 'Deploy'
+  displayName: 'Deploy the web application'
+  dependsOn: build
+  jobs:
+  - deployment: Deploy
+    pool:
+      vmImage: 'ubuntu-20.04'
+    environment: dev
+    variables:
+    - group: Release
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - download: current
+            artifact: drop
+          - task: AzureWebApp@1
+            displayName: 'Azure App Service Deploy: PHP app'
+            inputs:
+              azureSubscription: 'Resource Manager - PHP website'
+              appName: '$(WebAppName)'
+              package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'
