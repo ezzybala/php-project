@@ -44,6 +44,3 @@ stages:
         ArtifactName: 'drop'
         PathtoPublish: $(Build.ArtifactStagingDirectory)
   
-    
-
-
